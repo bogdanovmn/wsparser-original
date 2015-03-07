@@ -1,17 +1,21 @@
-package WebSiteParser::Abstract::Users;
+package WebSiteParser::Users;
 
 use strict;
 use warnings;
 use utf8;
+
+use base 'WebSiteParser::Abstract';
 
 
 sub new {
 	my ($class, %p) = @_;
 
 	my $self = {
-		
+		action => {
+			get_list => $p{get_list},
+		}
 	};
-
+		
 	return bless $self, $class;
 }
 
