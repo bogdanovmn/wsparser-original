@@ -7,7 +7,7 @@ use FindBin;
 use Config::Simple;
 
 
-my $config = Config::Simple->new($FindBin::Bin. '/../etc/config');
+my $config = Config::Simple->new($FindBin::Bin. '/../etc/db');
 
 make_schema_at(
 	'WebSiteParser::Schema',
@@ -16,9 +16,9 @@ make_schema_at(
 		dump_directory => $FindBin::Bin. '/../lib',
 	},
 	[ 
-		sprintf('dbi:mysql:dbname="%s"', $config->param('db_name')),
-		$config->param('db_user'), 
-		$config->param('db_pass'), 
+		sprintf('dbi:mysql:dbname=%s', $config->param('name')),
+		$config->param('user'), 
+		$config->param('pass'), 
 	#	{ loader_class => 'MyLoader' } # optionally
 	],
 );
