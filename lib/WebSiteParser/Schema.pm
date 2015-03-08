@@ -15,6 +15,31 @@ __PACKAGE__->load_namespaces;
 # Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-03-08 00:15:02
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:ye209ExmvO+5YPE7ulf5oA
 
-
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
+
+use Config::Simple;
+
+use Exporter;
+our @ISA    = qw( Exporter );
+our @EXPORT = qw( schema );
+
+my $__SCHEMA;
+
+sub schema {
+	unless ($__SCHEMA) {
+		my $config = Config::Simple->new('/../../etc/db');
+		$__SCHEMA  = __PACKAGE__->connect(
+			sprintf('dbi:mysql:%s:%s', $config->param('name'), $config->param('host')), 
+			$config->param('user'), 
+			$config->param('pass'),
+			{ 
+				RaiseError => 1,
+				mysql_auto_reconnect => 1,
+				mysql_enable_utf8    => 1
+			}
+		) or die $!;
+	}
+	return $__SCHEMA;
+}
+
 1;

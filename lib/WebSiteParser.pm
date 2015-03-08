@@ -6,12 +6,13 @@ use utf8;
 
 use WebSiteParser::Users;
 use WebSiteParser::Posts;
-
+use WebSiteParser::Schema;
 
 sub new {
 	my ($class, %p) = @_;
 
 	my $self = {
+		site  => $p{site},
 		users => WebSiteParser::Users->new,
 		posts => WebSiteParser::Posts->new,
 	};
@@ -19,11 +20,12 @@ sub new {
 	return bless $self, $class;
 }
 
-sub parse {
-	my ($self) = @_;
+sub get_users {
+	my ($self, $url, $handler) = @_;
 
-	$self->{users}->parse;
-	$self->{posts}->parse;
+	my $html;
+	my $users = &$handler($html);
+	$self->{users}->add_list($users);
 }
 
 1;
