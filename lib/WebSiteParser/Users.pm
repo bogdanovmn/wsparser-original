@@ -12,6 +12,7 @@ sub new {
 	my ($class, %p) = @_;
 
 	my $self = {
+		site_id => $p{site_id}
 	};
 		
 	return bless $self, $class;
@@ -24,8 +25,9 @@ sub add_list {
 		logger->debug(sprintf 'create user "%s", url link: %s', $u->{name}, $u->{url});
 
 		schema->resultset('User')->create({
-			name => $u->{name},
-			url  => $u->{url}
+			name    => $u->{name},
+			url     => $u->{url},
+			site_id => $self->{site_id},
 		});
 	}
 }

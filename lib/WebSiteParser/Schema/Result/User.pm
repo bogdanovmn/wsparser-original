@@ -90,4 +90,5 @@ __PACKAGE__->might_have(
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
+#__PACKAGE__->result_class('DBIx::Class::ResultClass::HashRefInflator');
 1;

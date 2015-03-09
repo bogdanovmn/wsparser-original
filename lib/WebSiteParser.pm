@@ -16,7 +16,6 @@ sub new {
 	my ($class, %p) = @_;
 
 	my $host = $p{host};
-		debug schema->resultset('Site')->search({ host => $host })->first;
 	my $self = {
 		site => schema->resultset('Site')->search({ host => $host })->first
 	};
@@ -25,19 +24,16 @@ sub new {
 		$self->{site} = schema->resultset('Site')->create({ host => $host })->first;
 	}
 	
-	$self = {
-		users    => WebSiteParser::Users->new(site_id => $self->{site}->{id}),
-		posts    => WebSiteParser::Posts->new(site_id => $self->{site}->{id}),
-	};
-
+	$self->{users} = WebSiteParser::Users->new(site_id => $self->{site}->{id});
+	$self->{posts} = WebSiteParser::Posts->new(site_id => $self->{site}->{id});
 
 	return bless $self, $class;
 }
 
 sub get_users {
 	my ($self, $url, $handler) = @_;
-debug $self->{site};
-	my $full_url = $self->{site}->{host}. '/'. $url;
+
+	my $full_url = sprintf 'http://%s/%s', $self->{site}->{host}, $url;
 
 	logger->info('get users start');
 	

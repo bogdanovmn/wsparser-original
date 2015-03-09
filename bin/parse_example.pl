@@ -15,7 +15,7 @@ sub parse_users_list {
 	my %users = $html =~ m#<p><a href='(/users/\d+\.html)'>(.*?)</a></p>#g;
 
 	return [
-		map {{ url => $users{$_}, name => $_ }}
+		map {{ name => $users{$_}, url => $_ }}
 		keys %users
 	];
 }
