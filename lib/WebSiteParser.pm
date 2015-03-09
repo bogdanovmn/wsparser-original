@@ -6,7 +6,7 @@ use utf8;
 
 use WebSiteParser::Users;
 use WebSiteParser::Posts;
-use WebSiteParser::Schema;
+use WebSiteParser::DB;
 use WebSiteParser::Logger;
 
 sub new {
@@ -27,7 +27,7 @@ sub get_users {
 
 	logger->info('get users start');
 	
-	my $html;
+	my $html = '';
 
 	logger->debug('url: '. $self->{url_base}. $url);
 	logger->debug('handler: '. $handler);

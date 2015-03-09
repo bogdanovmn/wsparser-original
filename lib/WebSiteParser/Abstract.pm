@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use utf8;
 
-use WebSiteParser::Schema;
+use WebSiteParser::DB;
 use LWP::UserAgent;
 
 sub new {

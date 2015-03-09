@@ -36,7 +36,7 @@ sub parse_post_page {}
 my $parser = WebSiteParser->new(site => 'ncuxywka.com');
 $parser->get_users(
 	'/users/',
-	&parse_users_list
+	\&parse_users_list
 );
 $parser->get_users_pages;
 

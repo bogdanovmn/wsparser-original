@@ -14,6 +14,7 @@ our @EXPORT = qw( logger );
 
 my $__LOGGER;
 
+
 sub logger {
 	unless ($__LOGGER) {
 		Log::Log4perl->init($FindBin::Bin. '/../etc/'. config->param('logger'));
@@ -21,5 +22,15 @@ sub logger {
 	}
 	return $__LOGGER;
 }
+
+$SIG{__WARN__} = sub {
+	logger->warn($_[0]);
+	warn $_[0];
+};
+
+$SIG{__DIE__} = sub {
+	logger->error($_[0]);
+	die $_[0];
+};
 
 1;
