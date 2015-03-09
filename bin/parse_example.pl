@@ -2,14 +2,16 @@ use strict;
 use warnings;
 use utf8;
 
+use FindBin;
+use lib $FindBin::Bin. '/../lib';
+
 use WebSiteParser;
 
 
-sub parse_user_list {
-	my ($self) = @_;
+sub parse_users_list {
+	my ($html) = @_;
 
-	my $users_html = $self->_download('/users/');
-	print $users_html;
+	print $html;
 
 	return [
 		{ url => '', name => '' }
@@ -34,7 +36,7 @@ sub parse_post_page {}
 my $parser = WebSiteParser->new(site => 'ncuxywka.com');
 $parser->get_users(
 	'/users/',
-	parse_users_list
+	&parse_users_list
 );
 $parser->get_users_pages;
 

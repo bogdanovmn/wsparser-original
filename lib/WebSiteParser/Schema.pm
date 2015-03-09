@@ -17,7 +17,7 @@ __PACKAGE__->load_namespaces;
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
 
-use Config::Simple;
+use WebSiteParser::Config;
 
 use Exporter;
 our @ISA    = qw( Exporter );
@@ -27,11 +27,10 @@ my $__SCHEMA;
 
 sub schema {
 	unless ($__SCHEMA) {
-		my $config = Config::Simple->new('/../../etc/db');
 		$__SCHEMA  = __PACKAGE__->connect(
-			sprintf('dbi:mysql:%s:%s', $config->param('name'), $config->param('host')), 
-			$config->param('user'), 
-			$config->param('pass'),
+			sprintf('dbi:mysql:%s:%s', config_db->param('name'), config_db->param('host')), 
+			config_db->param('user'), 
+			config_db->param('pass'),
 			{ 
 				RaiseError => 1,
 				mysql_auto_reconnect => 1,
