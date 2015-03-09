@@ -6,15 +6,17 @@ use FindBin;
 use lib $FindBin::Bin. '/../lib';
 
 use WebSiteParser;
+use Utils;
 
 
 sub parse_users_list {
 	my ($html) = @_;
 
-	print $html;
+	my %users = $html =~ m#<p><a href='(/users/\d+\.html)'>(.*?)</a></p>#g;
 
 	return [
-		{ url => '', name => '' }
+		map {{ url => $users{$_}, name => $_ }}
+		keys %users
 	];
 }
 
@@ -33,12 +35,12 @@ sub parse_user_page {
 }
 sub parse_post_page {}
 
-my $parser = WebSiteParser->new(site => 'ncuxywka.com');
+my $parser = WebSiteParser->new(host => 'ncuxywka.com');
 $parser->get_users(
 	'/users/',
 	\&parse_users_list
 );
-$parser->get_users_pages;
+#$parser->get_users_pages;
 
 #$parser->fetch_user_info(parse_user_page);
 

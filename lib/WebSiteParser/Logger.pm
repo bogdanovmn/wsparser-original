@@ -7,6 +7,7 @@ use utf8;
 use WebSiteParser::Config;
 use Log::Log4perl;
 use FindBin;
+use Carp;
 
 use Exporter;
 our @ISA    = qw( Exporter );
@@ -30,6 +31,7 @@ $SIG{__WARN__} = sub {
 
 $SIG{__DIE__} = sub {
 	logger->error($_[0]);
+	#confess $_[0];
 	die $_[0];
 };
 

@@ -8,34 +8,47 @@ use WebSiteParser::Users;
 use WebSiteParser::Posts;
 use WebSiteParser::DB;
 use WebSiteParser::Logger;
+use WebSiteParser::Downloader;
+use Utils;
+
 
 sub new {
 	my ($class, %p) = @_;
 
+	my $host = $p{host};
+		debug schema->resultset('Site')->search({ host => $host })->first;
 	my $self = {
-		site     => $p{site},
-		url_base => 'http://'. $p{site},
-		users    => WebSiteParser::Users->new,
-		posts    => WebSiteParser::Posts->new,
+		site => schema->resultset('Site')->search({ host => $host })->first
 	};
 
-	schema->resultset('Site')->find_or_create({ host => $self->{site} });
+	unless ($self->{site}) {
+		$self->{site} = schema->resultset('Site')->create({ host => $host })->first;
+	}
+	
+	$self = {
+		users    => WebSiteParser::Users->new(site_id => $self->{site}->{id}),
+		posts    => WebSiteParser::Posts->new(site_id => $self->{site}->{id}),
+	};
+
 
 	return bless $self, $class;
 }
 
 sub get_users {
 	my ($self, $url, $handler) = @_;
+debug $self->{site};
+	my $full_url = $self->{site}->{host}. '/'. $url;
 
 	logger->info('get users start');
 	
-	my $html = '';
-
-	logger->debug('url: '. $self->{url_base}. $url);
-	logger->debug('handler: '. $handler);
-
-	my $users = &$handler($html);
-	$self->{users}->add_list($users);
+	my $html = download($full_url);
+	if ($html) {
+		my $users = &$handler($html);
+		$self->{users}->add_list($users);
+	}
+	else {
+		logger->error('get users page error');
+	}
 }
 
 1;

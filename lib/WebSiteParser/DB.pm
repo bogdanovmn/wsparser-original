@@ -20,7 +20,7 @@ sub schema {
 			config_db->param('user'), 
 			config_db->param('pass'),
 			{ 
-				RaiseError => 1,
+				RaiseError           => 1,
 				mysql_auto_reconnect => 1,
 				mysql_enable_utf8    => 1
 			}

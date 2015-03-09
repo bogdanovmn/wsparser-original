@@ -1,12 +1,11 @@
-package WebSiteParser::Posts;
+package WebSiteParser::Users;
 
 use strict;
 use warnings;
 use utf8;
 
 use WebSiteParser::DB;
-
-use base 'WebSiteParser::Abstract';
+use WebSiteParser::Logger;
 
 
 sub new {
@@ -19,15 +18,16 @@ sub new {
 }
 	
 sub add_list {
-	my ($self, $posts) = @_;
+	my ($self, $users) = @_;
 
-	foreach my $p (@$posts) {
-		schema->resultset('Post')->create({
-			user_id => $p->{user_id},
-			name    => $p->{name},
-			url     => $p->{url}
+	foreach my $u (@$users) {
+		logger->debug(sprintf 'create user "%s", url link: %s', $u->{name}, $u->{url});
+
+		schema->resultset('User')->create({
+			name => $u->{name},
+			url  => $u->{url}
 		});
 	}
-
 }
+
 1;

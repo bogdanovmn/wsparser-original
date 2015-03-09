@@ -42,6 +42,7 @@ __PACKAGE__->add_columns(
   },
 );
 __PACKAGE__->set_primary_key("id");
+__PACKAGE__->add_unique_constraint("host", ["host"]);
 __PACKAGE__->has_many(
   "users",
   "WebSiteParser::Schema::Result::User",
@@ -50,8 +51,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-03-09 23:39:57
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Fzv4/e3dCCr1CHjV66MXxw
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-03-09 23:46:06
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:vvp4DF6dkEqkoO7RJjR6ew
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

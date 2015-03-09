@@ -1,4 +1,4 @@
-package WebSiteParser::Users;
+package WebSiteParser::Posts;
 
 use strict;
 use warnings;
@@ -19,14 +19,15 @@ sub new {
 }
 	
 sub add_list {
-	my ($self, $users) = @_;
+	my ($self, $posts) = @_;
 
-	foreach my $u (@$users) {
-		schema->resultset('User')->create({
-			name => $u->{name},
-			url  => $u->{url}
+	foreach my $p (@$posts) {
+		schema->resultset('Post')->create({
+			user_id => $p->{user_id},
+			name    => $p->{name},
+			url     => $p->{url}
 		});
 	}
-}
 
+}
 1;
