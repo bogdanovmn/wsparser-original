@@ -14,6 +14,7 @@ make_schema_at(
 	{ 
 		debug => 1,
 		dump_directory => $FindBin::Bin. '/../lib',
+		generate_pod => 0,
 	},
 	[ 
 		sprintf('dbi:mysql:dbname=%s', $config->param('name')),

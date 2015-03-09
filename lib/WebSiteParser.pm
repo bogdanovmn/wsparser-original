@@ -19,6 +19,8 @@ sub new {
 		posts    => WebSiteParser::Posts->new,
 	};
 
+	schema->resultset('Site')->find_or_create({ host => $self->{site} });
+
 	return bless $self, $class;
 }
 
