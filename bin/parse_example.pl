@@ -40,7 +40,7 @@ $parser->get_users(
 	'/users/',
 	\&parse_users_list
 );
-#$parser->get_users_pages;
+$parser->get_users_pages;
 
 #$parser->fetch_user_info(parse_user_page);
 

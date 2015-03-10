@@ -22,13 +22,16 @@ sub add_list {
 	my ($self, $users) = @_;
 
 	foreach my $u (@$users) {
-		logger->debug(sprintf 'create user "%s", url link: %s', $u->{name}, $u->{url});
-
-		schema->resultset('User')->create({
-			name    => $u->{name},
-			url     => $u->{url},
-			site_id => $self->{site_id},
-		});
+		if (schema->resultset('User')->search({ site_id => $self->{site_id}, url => $u->{url} })->first) {
+			logger->debug(sprintf 'user "%s" already exists, url link: %s', $u->{name}, $u->{url});
+		}
+		else {
+			logger->debug(sprintf 'create user "%s", url link: %s', $u->{name}, $u->{url});
+			schema->resultset('User')->create({
+				url     => $u->{url},
+				site_id => $self->{site_id},
+			});
+		}
 	}
 }
 
