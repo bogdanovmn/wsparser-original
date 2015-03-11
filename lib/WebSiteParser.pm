@@ -21,8 +21,7 @@ sub new {
 	};
 
 	unless ($self->{site}) {
-		schema->resultset('Site')->create({ host => $host });
-		$self->{site} = schema->resultset('Site')->find(schema->storage->dbh->last_insert_id);
+		$self->{site} = schema->resultset('Site')->create({ host => $host });
 	}
 	
 	$self->{users} = WebSiteParser::Users->new(site_id => $self->{site}->id);
