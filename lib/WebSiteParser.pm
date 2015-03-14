@@ -65,7 +65,8 @@ sub get_users_pages {
 		my $html = download($self->abs_url($user->url));
 		
 		if ($html) {
-			schema->resultset('UserHtml')->create({
+			logger->trace('store html to database');
+			schema->resultset('UserHtml')->update_or_create({
 				user_id => $user->id,
 				html    => $html
 			});
@@ -75,4 +76,5 @@ sub get_users_pages {
 		}
 	}
 }
+
 1;
