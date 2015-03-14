@@ -22,8 +22,11 @@ sub schema {
 			{ 
 				RaiseError           => 1,
 				mysql_auto_reconnect => 1,
-				mysql_enable_utf8    => 1
-			}
+				mysql_enable_utf8    => 1,
+			},
+			#{
+			#	on_connect_do        => ['SET NAMES utf8']
+			#}
 		) or die $!;
 	}
 	return $__SCHEMA;

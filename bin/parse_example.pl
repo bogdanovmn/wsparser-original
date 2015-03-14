@@ -28,8 +28,7 @@ sub parse_user_page {
 	my ($city)                 = $html =~ m#<b>Город:</b>\s*<br>\s*(.*?)\s*<br>#;
 	my ($about)                = $html =~ m#<b>О себе:</b>\s*<br>\s*(.*?)\s*<br>#;
 
-
-	return {
+	return { 
 		name      => $name,
 		about     => $about,
 		region    => $city,

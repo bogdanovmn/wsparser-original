@@ -1,0 +1,3 @@
+alter table user_html modify column html mediumtext not null;
+alter table user modify column reg_date datetime default null;
+alter table user modify column edit_date datetime default null;

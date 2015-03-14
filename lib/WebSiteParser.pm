@@ -77,4 +77,34 @@ sub get_users_pages {
 	}
 }
 
+sub fetch_users_info {
+	my ($self, $html_handler) = @_;
+
+	logger->info('fetch info from users pages');
+	my $users = schema->resultset('User')->search({ name => undef });
+
+	while (my $user = $users->next) {
+		my $user_html = schema->resultset('UserHtml')->find($user->id);
+		if ($user_html) {
+			logger->debug(sprintf 'parse user (id=%d) info', $user->id);
+			my $info = &$html_handler($user_html->html);
+			if (ref $info eq 'HASH' and $info->{name}) {
+				logger->debug(
+					sprintf 'parse success: %s', 
+						join(', ', sort grep { $info->{$_} } keys %$info)
+				);
+				$user->update({
+					name      => $info->{name},
+					about     => $info->{about},
+					region    => $info->{region},
+					reg_date  => $info->{reg_date},
+					edit_date => $info->{edit_date}
+				});
+			}
+			else {
+				logger->warn('parse failed');
+			}
+		}
+	}
+}
 1;

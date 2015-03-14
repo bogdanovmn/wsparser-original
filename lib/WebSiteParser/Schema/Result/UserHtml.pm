@@ -18,7 +18,7 @@ __PACKAGE__->add_columns(
     is_nullable => 0,
   },
   "html",
-  { data_type => "blob", is_nullable => 0 },
+  { data_type => "mediumtext", is_nullable => 0 },
   "updated",
   {
     data_type => "timestamp",
@@ -36,8 +36,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-03-09 23:39:57
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:3xE0X1Z1UZlRmySbI/BdXA
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-03-14 17:09:47
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:mBLgrEyeDcjuEtzFMDkDig
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
