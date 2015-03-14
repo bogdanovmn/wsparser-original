@@ -118,7 +118,7 @@ sub get_users_posts_list {
 	while (my $user = $users->next) {
 		my $user_html = schema->resultset('UserHtml')->find($user->id);
 		if ($user_html) {
-			logger->debug(sprintf 'parse user (id=%d) posts list', $user->id);
+			logger->trace(sprintf 'parse user (id=%d) posts list', $user->id);
 			my $list = &$html_handler($user_html->html);
 
 			if (ref $list eq 'ARRAY' and @$list) {
@@ -142,4 +142,46 @@ sub get_users_posts_list {
 		}
 	}
 }
+
+sub _get_posts_pages {
+	my ($self) = @_;
+
+	
+}
+
+sub fetch_users_posts_data {
+	my ($self, $html_handler) = @_;
+
+	logger->info('fetch data from users posts pages');
+	my $posts = schema->resultset('Post')->search(
+		{ 
+			'users.site_id' => $self->{site}->id, 
+			name => undef 
+		},
+		{ join => 'users' }
+	);
+
+	while (my $post = $posts->next) {
+		my $post_html = schema->resultset('PostHtml')->find($post->id);
+		if ($post_html) {
+			logger->debug(sprintf 'parse post info, id=%d', $post->id);
+			my $data = &$html_handler($post_html->html);
+			if (ref $data eq 'HASH' and $data->{name}) {
+				logger->debug(
+					sprintf 'parse success: %s', 
+						join(', ', sort grep { $data->{$_} } keys %$data)
+				);
+				$post->update({
+					name      => $data->{name},
+					body      => $data->{body},
+					post_date => $data->{post_date},
+				});
+			}
+			else {
+				logger->warn('parse failed');
+			}
+		}
+	}
+}
+
 1;

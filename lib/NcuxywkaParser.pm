@@ -1,16 +1,15 @@
+package NcuxywkaParser;
+
 use strict;
 use warnings;
 use utf8;
 
-use FindBin;
-use lib $FindBin::Bin. '/../lib';
-
-use NcuxywkaParser;
 use Utils;
+use base 'WebSiteParser';
 
 
-sub parse_users_list {
-	my ($html) = @_;
+sub _parse_users_list {
+	my ($self, $html) = @_;
 
 	my %users = $html =~ m#<p><a href='(/users/\d+\.html)'>(.*?)</a></p>#g;
 
@@ -20,8 +19,8 @@ sub parse_users_list {
 	];
 }
 
-sub parse_user_page {
-	my ($html) = @_;
+sub _parse_user_info {
+	my ($self, $html) = @_;
 
 	my ($name)                 = $html =~ m#"<span class=letter>(.*?)</span>"</h1>#;
 	my ($reg_date, $edit_date) = $html =~ m#<b>Дата регистрации:</b>\s*<br>\s*(\d+-\d+-\d+ \d+:\d+)\s*<br>\s*<br>\s*<b>Дата изменения данных:</b>\s*<br>\s*(\d+-\d+-\d+ \d+:\d+)\s#;
@@ -36,17 +35,21 @@ sub parse_user_page {
 		edit_date => $edit_date
 	};
 }
-sub parse_posts_list_page {
-	my ($html) = @_;	
+sub _parse_user_posts_list {
+	my ($self, $html) = @_;	
 	
 	my @list = $html =~ m#<tr>\s*<td class=date>\s*\d+-\d+-\d+\s*<td class=title>\s*<a href="(.*?)">#g;
 	return \@list;
 }
-sub parse_post_page {}
 
-my $parser = WebSiteParser->new(host => 'ncuxywka.com');
-#$parser->get_users('/users/', \&parse_users_list);
-#$parser->get_users_pages;
-#$parser->fetch_users_info(\&parse_user_page);
-#$parser->get_users_posts_list(\&parse_posts_list_page);
-$parser->fetch_user_posts_data;
+sub _parse_post_data {
+	my ($self, $html) = @_;
+
+
+	return {
+		name => '',
+		body => ''
+	}
+}
+
+1;
