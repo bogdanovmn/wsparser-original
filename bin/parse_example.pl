@@ -36,12 +36,18 @@ sub parse_user_page {
 		edit_date => $edit_date
 	};
 }
+sub parse_posts_list_page {
+	my ($html) = @_;	
+	
+	my @list = $html =~ m#<tr>\s*<td class=date>\s*\d+-\d+-\d+\s*<td class=title>\s*<a href="(.*?)">#g;
+	return \@list;
+}
 sub parse_post_page {}
 
 my $parser = WebSiteParser->new(host => 'ncuxywka.com');
 #$parser->get_users('/users/', \&parse_users_list);
 #$parser->get_users_pages;
-$parser->fetch_users_info(\&parse_user_page);
+#$parser->fetch_users_info(\&parse_user_page);
 
-#$parser->get_user_posts_list;
+$parser->get_users_posts_list(\&parse_posts_list_page);
 #$parser->get_user_posts_pages;

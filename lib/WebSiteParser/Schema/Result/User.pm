@@ -28,17 +28,15 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 0, size => 250 },
   "reg_date",
   {
-    data_type => "timestamp",
+    data_type => "datetime",
     datetime_undef_if_invalid => 1,
-    default_value => "0000-00-00 00:00:00",
-    is_nullable => 0,
+    is_nullable => 1,
   },
   "edit_date",
   {
-    data_type => "timestamp",
+    data_type => "datetime",
     datetime_undef_if_invalid => 1,
-    default_value => "0000-00-00 00:00:00",
-    is_nullable => 0,
+    is_nullable => 1,
   },
   "name",
   { data_type => "varchar", is_nullable => 1, size => 250 },
@@ -85,8 +83,8 @@ __PACKAGE__->might_have(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-03-09 23:39:57
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:5AEJBDDI9wQgdYyKAUcH/g
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-03-14 18:15:04
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:mRa5pbNXaIibMTjHafKsLA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

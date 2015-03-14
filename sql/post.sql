@@ -5,7 +5,7 @@ CREATE TABLE post (
 	url         varchar(250)      NOT NULL UNIQUE,
 	name        varchar(250)      DEFAULT NULL,
 	body        text              DEFAULT NULL,
-	post_date   timestamp         DEFAULT 0,
+	post_date   datetime          DEFAULT NULL,
 	updated     timestamp         NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	
 	PRIMARY KEY (id),

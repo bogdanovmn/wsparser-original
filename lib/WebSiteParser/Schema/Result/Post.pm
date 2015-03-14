@@ -32,10 +32,9 @@ __PACKAGE__->add_columns(
   { data_type => "text", is_nullable => 1 },
   "post_date",
   {
-    data_type => "timestamp",
+    data_type => "datetime",
     datetime_undef_if_invalid => 1,
-    default_value => "0000-00-00 00:00:00",
-    is_nullable => 0,
+    is_nullable => 1,
   },
   "updated",
   {
@@ -46,7 +45,7 @@ __PACKAGE__->add_columns(
   },
 );
 __PACKAGE__->set_primary_key("id");
-__PACKAGE__->add_unique_constraint("url", ["url"]);
+__PACKAGE__->add_unique_constraint("u_post__user_url", ["user_id", "url"]);
 __PACKAGE__->might_have(
   "post_html",
   "WebSiteParser::Schema::Result::PostHtml",
@@ -61,10 +60,9 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-03-09 23:39:57
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:C0wlEi77s9LuYMNnkdvlww
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-03-14 18:15:04
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:PIVoCUV1DjJif44d273kgw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
-__PACKAGE__->result_class('DBIx::Class::ResultClass::HashRefInflator');
 1;

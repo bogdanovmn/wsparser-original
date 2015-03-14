@@ -59,7 +59,7 @@ sub get_users_pages {
 
 	logger->info('get users pages start');
 
-	my $users = schema->resultset('User')->search({ name => undef });
+	my $users = schema->resultset('User')->search({ site_id => $self->{site}->id, name => undef });
 
 	while (my $user = $users->next) {
 		my $html = download($self->abs_url($user->url));
@@ -81,7 +81,7 @@ sub fetch_users_info {
 	my ($self, $html_handler) = @_;
 
 	logger->info('fetch info from users pages');
-	my $users = schema->resultset('User')->search({ name => undef });
+	my $users = schema->resultset('User')->search({ site_id => $self->{site}->id, name => undef });
 
 	while (my $user = $users->next) {
 		my $user_html = schema->resultset('UserHtml')->find($user->id);
@@ -103,6 +103,41 @@ sub fetch_users_info {
 			}
 			else {
 				logger->warn('parse failed');
+			}
+		}
+	}
+}
+
+sub get_users_posts_list {
+	my ($self, $html_handler) = @_;
+
+	logger->info('get users posts list');
+
+	my $users = schema->resultset('User')->search({ site_id => $self->{site}->id, name => { '!=' => undef }});
+
+	while (my $user = $users->next) {
+		my $user_html = schema->resultset('UserHtml')->find($user->id);
+		if ($user_html) {
+			logger->debug(sprintf 'parse user (id=%d) posts list', $user->id);
+			my $list = &$html_handler($user_html->html);
+
+			if (ref $list eq 'ARRAY' and @$list) {
+				logger->info(sprintf 'for user_id=%d parsed %d posts links', $user->id, scalar @$list);
+				foreach my $url (@$list) {
+					if (schema->resultset('Post')->search({user_id => $user->id, url => $url })->single) {
+						logger->debug(sprintf 'post link already exists: user_id=%d, url=%s', $user->id, $url);
+					}
+					else {
+						logger->trace(sprintf 'store to database url=%s', $url);
+						schema->resultset('Post')->create({
+							user_id => $user->id,
+							url     => $url,
+						});
+					}
+				}
+			}
+			else {
+				logger->warn('parse empty result');
 			}
 		}
 	}
