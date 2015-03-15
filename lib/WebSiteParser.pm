@@ -17,18 +17,26 @@ sub new {
 
 	my $host = $p{host};
 	my $self = {
-		site => schema->resultset('Site')->search({ host => $host })->first
+		site           => schema->resultset('Site')->search({ host => $host })->first,
+		users_list_url => $p{users_list_url}
 	};
+
+	unless ($self->{users_list_url}) {
+		die 'users list url not defined!';
+	}
 
 	unless ($self->{site}) {
 		$self->{site} = schema->resultset('Site')->create({ host => $host });
 	}
 	
-	$self->{users} = WebSiteParser::Users->new(site_id => $self->{site}->id);
-	$self->{posts} = WebSiteParser::Posts->new(site_id => $self->{site}->id);
+	$self->{users} = WebSiteParser::Users->new(site => $self->{site});
+	$self->{posts} = WebSiteParser::Posts->new(site => $self->{site});
 
 	return bless $self, $class;
 }
+
+sub _posts { $_[0]->{posts} }
+sub _users { $_[0]->{users} }
 
 sub full_parse {
 	my ($self) = @_;
@@ -38,27 +46,27 @@ sub full_parse {
 	$self->_process_users_pages;
 	
 	$self->_get_posts_pages;
-	$self->_process_posts_pages;
+	#$self->_process_posts_pages;
 }
 
-sub abs_url {
+sub _abs_url {
 	my ($self, $url) = @_;
 
 	return sprintf 'http://%s%s', $self->{site}->host, $url;
 }
 
 sub _get_users {
-	my ($self, $url) = @_;
+	my ($self) = @_;
 
 	logger->info('get users list');
 	
-	my $html = download($self->abs_url($url));
+	my $html = download($self->_abs_url($self->{users_list_url}));
 	if ($html) {
 		logger->info('parse users list');
 		my $users = $self->_parse_users_list($html);
 
 		logger->info('add users to database');
-		$self->{users}->add_list($users);
+		$self->_users->add_list($users);
 	}
 	else {
 		logger->error('get users page error');
@@ -73,7 +81,7 @@ sub _get_users_pages {
 	my $users = schema->resultset('User')->search({ site_id => $self->{site}->id, name => undef });
 
 	while (my $user = $users->next) {
-		my $html = download($self->abs_url($user->url));
+		my $html = download($self->_abs_url($user->url));
 		
 		if ($html) {
 			logger->trace('store html to database');
@@ -147,22 +155,26 @@ sub _process_users_pages {
 	}
 }
 
-sub _get_post_pages {
+sub _get_posts_pages {
 	my ($self) = @_;
 
 	logger->info('get posts pages');
-	my $posts = schema->resultset('Post')->search(
-		{ 
-			'users.site_id' => $self->{site}->id, 
-			name => undef 
-		},
-		{ join => 'users' }
-	);
-
-	while (my $post = $posts->next) {
+	my $i = 0;
+	while (my $posts = $self->_posts->without_html(10)) {
+		logger->info(sprintf 'get pack of posts without html (iter #%d)', ++$i);
+		while (my $post = $posts->next) {
+			my $html = download($self->_abs_url($post->url));
+			if ($html) {
+				$self->_posts->add_html($post, $html);
+			}
+			else {
+				logger->error('get post page error');
+			}
+		}
 	}
 
 }
+
 sub _process_posts_data {
 	my ($self) = @_;
 

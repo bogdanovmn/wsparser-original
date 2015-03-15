@@ -9,6 +9,9 @@ use NcuxywkaParser;
 use Utils;
 
 
-my $parser = NcuxywkaParser->new(host => 'ncuxywka.com');
+my $parser = NcuxywkaParser->new(
+	host           => 'ncuxywka.com',
+	users_list_url => '/users/',
+);
 $parser->full_parse;
 

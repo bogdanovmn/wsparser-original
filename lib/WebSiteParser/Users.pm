@@ -12,7 +12,7 @@ sub new {
 	my ($class, %p) = @_;
 
 	my $self = {
-		site_id => $p{site_id}
+		site => $p{site}
 	};
 		
 	return bless $self, $class;
@@ -22,14 +22,14 @@ sub add_list {
 	my ($self, $users) = @_;
 
 	foreach my $u (@$users) {
-		if (schema->resultset('User')->search({ site_id => $self->{site_id}, url => $u->{url} })->first) {
+		if (schema->resultset('User')->search({ site_id => $self->{site}->id, url => $u->{url} })->single) {
 			logger->debug(sprintf 'user "%s" already exists, url link: %s', $u->{name}, $u->{url});
 		}
 		else {
 			logger->debug(sprintf 'create user "%s", url link: %s', $u->{name}, $u->{url});
 			schema->resultset('User')->create({
 				url     => $u->{url},
-				site_id => $self->{site_id},
+				site_id => $self->{site}->id,
 			});
 		}
 	}
