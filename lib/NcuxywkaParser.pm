@@ -35,6 +35,7 @@ sub _parse_user_info {
 		edit_date => $edit_date
 	};
 }
+
 sub _parse_user_posts_list {
 	my ($self, $html) = @_;	
 	
