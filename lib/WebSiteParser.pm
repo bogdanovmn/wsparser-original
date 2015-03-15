@@ -78,21 +78,25 @@ sub _get_users_pages {
 
 	logger->info('get users pages');
 
-	my $users = schema->resultset('User')->search({ site_id => $self->{site}->id, name => undef });
-
-	while (my $user = $users->next) {
-		my $html = download($self->_abs_url($user->url));
-		
-		if ($html) {
-			logger->trace('store html to database');
-			schema->resultset('UserHtml')->update_or_create({
-				user_id => $user->id,
-				html    => $html
-			});
+	my $users = $self->_users->without_html;
+	if ($users->count) {
+		while (my $user = $users->next) {
+			my $html = download($self->_abs_url($user->url));
+			
+			if ($html) {
+				logger->trace('store html to database');
+				schema->resultset('UserHtml')->update_or_create({
+					user_id => $user->id,
+					html    => $html
+				});
+			}
+			else {
+				logger->error('get users page error');
+			}
 		}
-		else {
-			logger->error('get users page error');
-		}
+	}
+	else {
+		logger->info('all users already with html');
 	}
 }
 
@@ -109,7 +113,7 @@ sub _process_users_pages {
 			#
 			# User info
 			#
-			logger->debug(sprintf 'parse info');
+			logger->trace('parse info');
 			my $info = $self->_parse_user_info($user_html->html);
 			if (ref $info eq 'HASH' and $info->{name}) {
 				logger->debug(
@@ -130,13 +134,13 @@ sub _process_users_pages {
 			#
 			# User posts list
 			#
-			logger->debug(sprintf 'parse posts list');
+			logger->trace('parse posts list');
 			my $list = $self->_parse_user_posts_list($user_html->html);
-			if (ref $list eq 'ARRAY' and $list->{name}) {
+			if (ref $list eq 'ARRAY') {
 				logger->info(sprintf 'found %d posts links', scalar @$list);
 				foreach my $url (@$list) {
 					if (schema->resultset('Post')->search({user_id => $user->id, url => $url })->single) {
-						logger->debug(sprintf 'post link already exists: user_id=%d, url=%s', $user->id, $url);
+						logger->trace(sprintf 'post link already exists: user_id=%d, url=%s', $user->id, $url);
 					}
 					else {
 						logger->trace(sprintf 'store to database url=%s', $url);
@@ -146,7 +150,6 @@ sub _process_users_pages {
 						});
 					}
 				}
-
 			}
 			else {
 				logger->warn('parse failed');
@@ -160,8 +163,10 @@ sub _get_posts_pages {
 
 	logger->info('get posts pages');
 	my $i = 0;
+	schema->storage->debug(1);
 	while (my $posts = $self->_posts->without_html(10)) {
-		logger->info(sprintf 'get pack of posts without html (iter #%d)', ++$i);
+		logger->info(sprintf 'get pack of posts without html (iter #%d, reminded: %d)', ++$i, $posts->count);
+		schema->storage->debug(0);
 		while (my $post = $posts->next) {
 			my $html = download($self->_abs_url($post->url));
 			if ($html) {

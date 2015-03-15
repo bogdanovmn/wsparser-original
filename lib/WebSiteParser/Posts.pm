@@ -31,7 +31,7 @@ sub add_list {
 
 sub without_html {
 	my ($self, $count) = @_;
-
+#schema->storage->debug(1);
 	return schema->resultset('Post')->search(
 		{ 
 			'user.site_id' => $self->{site}->id,

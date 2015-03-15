@@ -35,4 +35,20 @@ sub add_list {
 	}
 }
 
+sub without_html {
+	my ($self, $count) = @_;
+
+	return schema->resultset('User')->search(
+		{ 
+			site_id             => $self->{site}->id,
+			'user_html.user_id' => undef
+		},
+		{ 
+			join => 'user_html',
+			rows => $count || 100,
+			page => 1
+		}
+	);
+}
+
 1;
