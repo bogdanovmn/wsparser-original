@@ -165,9 +165,9 @@ sub _get_posts_pages {
 	my $i = 0;
 	schema->storage->debug(1);
 	while (my $posts = $self->_posts->without_html(10)) {
-		logger->info(sprintf 'get pack of posts without html (iter #%d, reminded: %d)', ++$i, $posts->count);
+		logger->info(sprintf 'get pack of posts without html (iter #%d, reminded: %d)', ++$i, $posts->{count});
 		schema->storage->debug(0);
-		while (my $post = $posts->next) {
+		while (my $post = $posts->{resultset}->next) {
 			my $html = download($self->_abs_url($post->url));
 			if ($html) {
 				$self->_posts->add_html($post, $html);

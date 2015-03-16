@@ -29,20 +29,37 @@ sub add_list {
 
 }
 
-sub without_html {
+sub without_html_count {
 	my ($self, $count) = @_;
-#schema->storage->debug(1);
+	
 	return schema->resultset('Post')->search(
 		{ 
-			'user.site_id' => $self->{site}->id,
+			'user.site_id'      => $self->{site}->id,
 			'post_html.post_id' => undef
 		},
 		{ 
-			join => ['user', 'post_html'],
-			rows => $count || 100,
-			page => 1
+			join   => ['user', 'post_html'],
 		}
-	);
+	)->count;
+}
+
+sub without_html {
+	my ($self, $count) = @_;
+	
+	return {
+		count     => $self->without_html_count,
+		resultset => schema->resultset('Post')->search(
+			{ 
+				'user.site_id'      => $self->{site}->id,
+				'post_html.post_id' => undef
+			},
+			{ 
+				join => ['user', 'post_html'],
+				rows => $count || 100,
+				page => 1
+			}
+		)
+	};
 }
 
 sub add_html {
