@@ -46,7 +46,7 @@ sub full_parse {
 	$self->_process_users_pages;
 	
 	$self->_get_posts_pages;
-	#$self->_process_posts_pages;
+	$self->_process_posts_pages;
 }
 
 sub _abs_url {
@@ -178,31 +178,43 @@ sub _get_posts_pages {
 
 }
 
-sub _process_posts_data {
+sub _process_posts_pages {
 	my ($self) = @_;
 
 	logger->info('process posts data');
 
 	my $i = 0;
-	while (my $posts_html = $self->_posts->not_processed) {
+	while (my $posts = $self->_posts->not_processed) {
 		logger->info(sprintf 'get pack of not processed posts (iter #%d, reminded: %d)', ++$i, $posts->{total});
-		while (my $post_html = $posts->{resultset}->next) {
-			#my $post_html = schema->resultset('PostHtml')->find($post->id);
+		while (my $post = $posts->{resultset}->next) {
 			logger->trace(sprintf 'parse post info, id=%d', $post->id);
-			my $data = $self->_parse_post_data($post_html->html);
-			if (ref $data eq 'HASH' and $data->{name} and $data->{body}) {
-				logger->debug(
-					sprintf 'parse success: %s', 
-						join(', ', sort grep { $data->{$_} } keys %$data)
-				);
-				$post->update({
-					name      => $data->{name},
-					body      => $data->{body},
-					post_date => $data->{post_date},
-				});
+			my $html = schema->resultset('PostHtml')->find($post->id)->html;
+			if ($html) {
+				my $data = $self->_parse_post_data($html);
+				if (ref $data eq 'HASH' and $data->{name} and $data->{body}) {
+					logger->trace(
+						sprintf 'parse success: %s', 
+							join(', ', sort grep { $data->{$_} } keys %$data)
+					);
+
+					logger->trace('update post data');
+					$post->update({
+						name      => $data->{name},
+						body      => $data->{body},
+						post_date => $data->{post_date},
+					});
+				}
+				else {
+					logger->warn(
+						sprintf 'parse failed (%s): post_id=%d, user_id=%d, url=%s', 
+							join(', ', sort grep { not $data->{$_} } keys %$data),
+							$post->id, $post->user_id, $post->url
+					);
+					$post->update({ parse_failed => 1 });
+				}
 			}
 			else {
-				logger->warn('parse failed');
+				logger->error('get stored html error');
 			}
 		}
 	}

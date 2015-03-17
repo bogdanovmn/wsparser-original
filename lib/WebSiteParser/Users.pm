@@ -23,7 +23,7 @@ sub add_list {
 
 	foreach my $u (@$users) {
 		if (schema->resultset('User')->search({ site_id => $self->{site}->id, url => $u->{url} })->single) {
-			logger->debug(sprintf 'user "%s" already exists, url link: %s', $u->{name}, $u->{url});
+			logger->trace(sprintf 'user "%s" already exists, url link: %s', $u->{name}, $u->{url});
 		}
 		else {
 			logger->debug(sprintf 'create user "%s", url link: %s', $u->{name}, $u->{url});

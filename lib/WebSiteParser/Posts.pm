@@ -65,19 +65,51 @@ sub without_html {
 		: undef;
 }
 
+sub not_processed_count {
+	my ($self) = @_;
+
+	return schema->resultset('Post')->search(
+		{ 
+			parse_failed        => 0,
+			'user.site_id'      => $self->{site}->id, 
+			'post_html.post_id' => { '!=' => undef },
+			-or => {
+				'me.name' => undef,
+				'me.body' => undef
+			}
+		},
+		{ 
+			join => ['post_html', 'user'] 
+		}
+	)->count;
+}
+
 sub not_processed {
 	my ($self, $count) = @_;
 
-	my $posts = schema->resultset('PostHtml')->search(
-		{ 
-			'user.site_id' => $self->{site}->id, 
-			-or => {
-				name => undef,
-				body => undef
-			}
-		},
-		{ join => ['post', 'user'] }
-	);
+	my $total = $self->not_processed_count;
+	return $total
+		? {
+			total     => $total,
+			resultset => scalar schema->resultset('Post')->search(
+				{ 
+					parse_failed        => 0,
+					'user.site_id' => $self->{site}->id, 
+					'post_html.post_id' => { '!=' => undef },
+					-or => {
+						'me.name' => undef,
+						'me.body' => undef
+					}
+				},
+				{ 
+					join => ['post_html', 'user'],
+					rows => $count || 100,
+					page => 1
+				}
+			)
+		}
+		: undef;
+}
 
 sub add_html {
 	my ($self, $post, $html) = @_;

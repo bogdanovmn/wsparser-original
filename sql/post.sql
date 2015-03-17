@@ -1,12 +1,13 @@
 CREATE TABLE post (
 
-	id          smallint unsigned NOT NULL AUTO_INCREMENT,
-	user_id     smallint unsigned NOT NULL,
-	url         varchar(250)      NOT NULL UNIQUE,
-	name        varchar(250)      DEFAULT NULL,
-	body        text              DEFAULT NULL,
-	post_date   datetime          DEFAULT NULL,
-	updated     timestamp         NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	id            smallint unsigned NOT NULL AUTO_INCREMENT,
+	user_id       smallint unsigned NOT NULL,
+	url           varchar(250)      NOT NULL UNIQUE,
+	name          varchar(250)      DEFAULT NULL,
+	body          text              DEFAULT NULL,
+	post_date     datetime          DEFAULT NULL,
+	parse_failed  tinyint unsigned  NOT NULL DEFAULT 0,
+	updated       timestamp         NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	
 	PRIMARY KEY (id),
 

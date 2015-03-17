@@ -46,10 +46,14 @@ sub _parse_user_posts_list {
 sub _parse_post_data {
 	my ($self, $html) = @_;
 
+	my ($name) = $html =~ m#<h1 class=creo_title>(.*?)</h1>#;
+	my ($date) = $html =~ m#<span class=creo_date>(.*?)</span>#;
+	my ($body) = $html =~ m#<div class=creo_body>(.*?)</div>#;
 
 	return {
-		name => '',
-		body => ''
+		name      => $name,
+		body      => $body,
+		post_date => $date
 	}
 }
 
