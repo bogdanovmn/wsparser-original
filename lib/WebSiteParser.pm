@@ -163,10 +163,8 @@ sub _get_posts_pages {
 
 	logger->info('get posts pages');
 	my $i = 0;
-	schema->storage->debug(1);
-	while (my $posts = $self->_posts->without_html(10)) {
-		logger->info(sprintf 'get pack of posts without html (iter #%d, reminded: %d)', ++$i, $posts->{count});
-		schema->storage->debug(0);
+	while (my $posts = $self->_posts->without_html) {
+		logger->info(sprintf 'get pack of posts without html (iter #%d, reminded: %d)', ++$i, $posts->{total});
 		while (my $post = $posts->{resultset}->next) {
 			my $html = download($self->_abs_url($post->url));
 			if ($html) {
@@ -183,21 +181,16 @@ sub _get_posts_pages {
 sub _process_posts_data {
 	my ($self) = @_;
 
-	logger->info('fetch data from users posts pages');
-	my $posts = schema->resultset('Post')->search(
-		{ 
-			'users.site_id' => $self->{site}->id, 
-			name => undef 
-		},
-		{ join => 'users' }
-	);
+	logger->info('process posts data');
 
-	while (my $post = $posts->next) {
-		my $post_html = schema->resultset('PostHtml')->find($post->id);
-		if ($post_html) {
-			logger->debug(sprintf 'parse post info, id=%d', $post->id);
+	my $i = 0;
+	while (my $posts_html = $self->_posts->not_processed) {
+		logger->info(sprintf 'get pack of not processed posts (iter #%d, reminded: %d)', ++$i, $posts->{total});
+		while (my $post_html = $posts->{resultset}->next) {
+			#my $post_html = schema->resultset('PostHtml')->find($post->id);
+			logger->trace(sprintf 'parse post info, id=%d', $post->id);
 			my $data = $self->_parse_post_data($post_html->html);
-			if (ref $data eq 'HASH' and $data->{name}) {
+			if (ref $data eq 'HASH' and $data->{name} and $data->{body}) {
 				logger->debug(
 					sprintf 'parse success: %s', 
 						join(', ', sort grep { $data->{$_} } keys %$data)

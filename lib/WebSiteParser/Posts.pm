@@ -45,22 +45,39 @@ sub without_html_count {
 
 sub without_html {
 	my ($self, $count) = @_;
-	
-	return {
-		count     => $self->without_html_count,
-		resultset => schema->resultset('Post')->search(
-			{ 
-				'user.site_id'      => $self->{site}->id,
-				'post_html.post_id' => undef
-			},
-			{ 
-				join => ['user', 'post_html'],
-				rows => $count || 100,
-				page => 1
-			}
-		)
-	};
+
+	my $total = $self->without_html_count;
+	return $total
+		? {
+			total     => $total,
+			resultset => scalar schema->resultset('Post')->search(
+				{ 
+					'user.site_id'      => $self->{site}->id,
+					'post_html.post_id' => undef
+				},
+				{ 
+					join => ['user', 'post_html'],
+					rows => $count || 100,
+					page => 1
+				}
+			)
+		}
+		: undef;
 }
+
+sub not_processed {
+	my ($self, $count) = @_;
+
+	my $posts = schema->resultset('PostHtml')->search(
+		{ 
+			'user.site_id' => $self->{site}->id, 
+			-or => {
+				name => undef,
+				body => undef
+			}
+		},
+		{ join => ['post', 'user'] }
+	);
 
 sub add_html {
 	my ($self, $post, $html) = @_;
