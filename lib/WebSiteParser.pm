@@ -45,6 +45,7 @@ sub full_parse {
 	$self->_get_users_pages;
 	$self->_process_users_pages;
 	
+	#$self->_get_posts_pages_fast;
 	$self->_get_posts_pages;
 	$self->_process_posts_pages;
 }
@@ -178,6 +179,30 @@ sub _get_posts_pages {
 
 }
 
+sub _get_posts_pages_fast {
+	my ($self) = @_;
+
+	logger->info('get posts pages fast');
+	my $i = 0;
+	while (my $posts = $self->_posts->without_html(10)) {
+		logger->info(sprintf 'get pack of posts without html (iter #%d, reminded: %d)', ++$i, $posts->{total});
+		my %url_post;
+		while (my $post = $posts->{resultset}->next) {
+			$url_post{$self->_abs_url($post->url)} = $post;
+		}
+
+		my $html_data = download_fast([ keys %url_post ]);
+		while (my ($abs_url, $html) = each %$html_data) {
+			if ($html) {
+				$self->_posts->add_html($url_post{$abs_url}, $html);
+			}
+			else {
+				logger->error('get post page error: '. $abs_url);
+			}
+		}
+	}
+
+}
 sub _process_posts_pages {
 	my ($self) = @_;
 
