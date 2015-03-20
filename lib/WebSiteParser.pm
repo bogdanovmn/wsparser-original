@@ -9,6 +9,7 @@ use WebSiteParser::Posts;
 use WebSiteParser::DB;
 use WebSiteParser::Logger;
 use WebSiteParser::Downloader;
+use Format::LongNumber;
 use Utils;
 
 
@@ -18,7 +19,8 @@ sub new {
 	my $host = $p{host};
 	my $self = {
 		site           => schema->resultset('Site')->search({ host => $host })->first,
-		users_list_url => $p{users_list_url}
+		users_list_url => $p{users_list_url},
+		fast_download  => $p{fast_download} // 1
 	};
 
 	unless ($self->{users_list_url}) {
@@ -41,13 +43,27 @@ sub _users { $_[0]->{users} }
 sub full_parse {
 	my ($self) = @_;
 
+	my $begin = time;
+	logger->info('full parse start');
+
 	$self->_get_users;
-	$self->_get_users_pages;
+	if ($self->{fast_download}) {
+		$self->_get_users_pages_fast;
+	}
+	else {
+		$self->_get_users_pages;
+	}
 	$self->_process_users_pages;
 	
-	#$self->_get_posts_pages_fast;
-	$self->_get_posts_pages;
-	$self->_process_posts_pages;
+	if ($self->{fast_download}) {
+		$self->_get_posts_pages_fast;
+	}
+	else {
+		$self->_get_posts_pages;
+	}
+	#$self->_process_posts_pages;
+
+	logger->info(sprintf 'full parse finished (%s total)', short_time(time - $begin));
 }
 
 sub _abs_url {
@@ -75,32 +91,48 @@ sub _get_users {
 }
 
 sub _get_users_pages {
-	my ($self, $handler) = @_;
+	my ($self) = @_;
 
 	logger->info('get users pages');
-
-	my $users = $self->_users->without_html;
-	if ($users->count) {
-		while (my $user = $users->next) {
+	my $i = 0;
+	while (my $users = $self->_users->without_html) {
+		logger->info(sprintf 'get pack of users without html (iter #%d, reminded: %d)', ++$i, $users->{total});
+		while (my $user = $users->{resultset}->next) {
 			my $html = download($self->_abs_url($user->url));
-			
 			if ($html) {
-				logger->trace('store html to database');
-				schema->resultset('UserHtml')->update_or_create({
-					user_id => $user->id,
-					html    => $html
-				});
+				$self->_users->add_html($user, $html);
 			}
 			else {
-				logger->error('get users page error');
+				logger->error('get user page error');
 			}
 		}
 	}
-	else {
-		logger->info('all users already with html');
-	}
-}
 
+}
+sub _get_users_pages_fast {
+	my ($self) = @_;
+
+	logger->info('get users pages fast');
+	my $i = 0;
+	while (my $users = $self->_users->without_html(100)) {
+		logger->info(sprintf 'get pack of users without html (iter #%d, reminded: %d)', ++$i, $users->{total});
+		my %url_user;
+		while (my $user = $users->{resultset}->next) {
+			$url_user{$self->_abs_url($user->url)} = $user;
+		}
+
+		my $html_data = download_fast([ keys %url_user ]);
+		while (my ($abs_url, $html) = each %$html_data) {
+			if ($html) {
+				$self->_users->add_html($url_user{$abs_url}, $html);
+			}
+			else {
+				logger->error('get user page error: '. $abs_url);
+			}
+		}
+	}
+
+}
 sub _process_users_pages {
 	my ($self) = @_;
 
@@ -184,7 +216,7 @@ sub _get_posts_pages_fast {
 
 	logger->info('get posts pages fast');
 	my $i = 0;
-	while (my $posts = $self->_posts->without_html(10)) {
+	while (my $posts = $self->_posts->without_html(100)) {
 		logger->info(sprintf 'get pack of posts without html (iter #%d, reminded: %d)', ++$i, $posts->{total});
 		my %url_post;
 		while (my $post = $posts->{resultset}->next) {

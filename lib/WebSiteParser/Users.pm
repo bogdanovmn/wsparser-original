@@ -35,20 +35,48 @@ sub add_list {
 	}
 }
 
-sub without_html {
+sub without_html_count {
 	my ($self, $count) = @_;
-
+	
 	return schema->resultset('User')->search(
 		{ 
-			site_id             => $self->{site}->id,
+			'me.site_id'      => $self->{site}->id,
 			'user_html.user_id' => undef
 		},
 		{ 
-			join => 'user_html',
-			rows => $count || 100,
-			page => 1
+			join   => 'user_html',
 		}
-	);
+	)->count;
 }
 
+sub without_html {
+	my ($self, $count) = @_;
+
+	my $total = $self->without_html_count;
+	return $total
+		? {
+			total     => $total,
+			resultset => scalar schema->resultset('User')->search(
+				{ 
+					'me.site_id'      => $self->{site}->id,
+					'user_html.user_id' => undef
+				},
+				{ 
+					join => 'user_html',
+					rows => $count || 100,
+					page => 1
+				}
+			)
+		}
+		: undef;
+}
+
+sub add_html {
+	my ($self, $user, $html) = @_;
+
+	schema->resultset('UserHtml')->create({
+		user_id => $user->id,
+		html    => $html
+	});
+}
 1;
