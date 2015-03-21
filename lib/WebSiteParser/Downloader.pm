@@ -80,6 +80,7 @@ sub download_fast {
 	foreach my $url (@$urls) {
 		http_get(
 			$url, 
+			#tls_ctx => { verify => 1, verify_peername => 'https' },
 			_common_params(), 
 			sub {
 				my ($body, $headers) = @_;

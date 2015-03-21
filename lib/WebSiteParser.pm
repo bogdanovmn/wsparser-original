@@ -61,7 +61,7 @@ sub full_parse {
 	else {
 		$self->_get_posts_pages;
 	}
-	#$self->_process_posts_pages;
+	$self->_process_posts_pages;
 
 	logger->info(sprintf 'full parse finished (%s total)', short_time(time - $begin));
 }
