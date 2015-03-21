@@ -74,6 +74,8 @@ sub without_html {
 sub add_html {
 	my ($self, $user, $html) = @_;
 
+	$html =~ s/-+/-/g;
+
 	schema->resultset('UserHtml')->create({
 		user_id => $user->id,
 		html    => $html

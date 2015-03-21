@@ -66,6 +66,23 @@ sub full_parse {
 	logger->info(sprintf 'full parse finished (%s total)', short_time(time - $begin));
 }
 
+sub users_full_parse {
+	my ($self) = @_;
+
+	my $begin = time;
+	logger->info('users full parse start');
+
+	$self->_get_users;
+	if ($self->{fast_download}) {
+		$self->_get_users_pages_fast;
+	}
+	else {
+		$self->_get_users_pages;
+	}
+	$self->_process_users_pages;
+	
+	logger->info(sprintf 'users full parse finished (%s total)', short_time(time - $begin));
+}
 sub _abs_url {
 	my ($self, $url) = @_;
 
@@ -155,6 +172,7 @@ sub _process_users_pages {
 				);
 				$user->update({
 					name      => $info->{name},
+					email     => $info->{email},
 					about     => $info->{about},
 					region    => $info->{region},
 					reg_date  => $info->{reg_date},
