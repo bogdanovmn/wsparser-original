@@ -1,4 +1,4 @@
-package NcuxywkaParser;
+package WebSiteParser::Instance::Ncuxywka;
 
 use strict;
 use warnings;

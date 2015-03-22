@@ -321,7 +321,7 @@ sub parse_post_by_id {
 	my ($self, $post_id) = @_;
 
 	my $html = schema->resultset('PostHtml')->find($post_id)->html;
-	$self->_parse_post_data($html);
+	debug $self->_parse_post_data($html);
 }
 
 1;

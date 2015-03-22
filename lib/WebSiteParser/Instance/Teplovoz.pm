@@ -1,4 +1,4 @@
-package TeplovozParser;
+package WebSiteParser::Instance::Teplovoz;
 
 use strict;
 use warnings;
