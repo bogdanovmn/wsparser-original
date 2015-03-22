@@ -6,7 +6,7 @@ use utf8;
 
 use WebSiteParser::DB;
 use WebSiteParser::Logger;
-
+use Utils;
 
 sub new {
 	my ($class, %p) = @_;
@@ -74,11 +74,11 @@ sub without_html {
 sub add_html {
 	my ($self, $user, $html) = @_;
 
-	$html =~ s/-+/-/g;
+	$html =~ s/\n|\r//g;
 
 	schema->resultset('UserHtml')->create({
 		user_id => $user->id,
-		html    => $html
+		html    => Utils::trim_html($html)
 	});
 }
 1;

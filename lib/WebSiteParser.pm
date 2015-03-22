@@ -20,7 +20,8 @@ sub new {
 	my $self = {
 		site           => schema->resultset('Site')->search({ host => $host })->first,
 		users_list_url => $p{users_list_url},
-		fast_download  => $p{fast_download} // 1
+		fast_download  => $p{fast_download} // 1,
+		charset        => $p{charset} || 'utf8'
 	};
 
 	unless ($self->{users_list_url}) {
@@ -47,20 +48,10 @@ sub full_parse {
 	logger->info('full parse start');
 
 	$self->_get_users;
-	if ($self->{fast_download}) {
-		$self->_get_users_pages_fast;
-	}
-	else {
-		$self->_get_users_pages;
-	}
+	$self->_get_users_pages;
 	$self->_process_users_pages;
 	
-	if ($self->{fast_download}) {
-		$self->_get_posts_pages_fast;
-	}
-	else {
-		$self->_get_posts_pages;
-	}
+	$self->_get_posts_pages;
 	$self->_process_posts_pages;
 
 	logger->info(sprintf 'full parse finished (%s total)', short_time(time - $begin));
@@ -72,21 +63,46 @@ sub users_full_parse {
 	my $begin = time;
 	logger->info('users full parse start');
 
-	$self->_get_users;
-	if ($self->{fast_download}) {
-		$self->_get_users_pages_fast;
-	}
-	else {
-		$self->_get_users_pages;
-	}
-	$self->_process_users_pages;
+	#$self->_get_users;
+	#$self->_get_users_pages;
+	#$self->_process_users_pages;
+	
+	$self->_get_posts_pages;
 	
 	logger->info(sprintf 'users full parse finished (%s total)', short_time(time - $begin));
 }
+
 sub _abs_url {
 	my ($self, $url) = @_;
 
 	return sprintf 'http://%s%s', $self->{site}->host, $url;
+}
+
+sub _is_fast_download {
+	my ($self) = @_;
+	return $self->{fast_download};
+}
+
+sub _get_users_pages {
+	my ($self) = @_;
+
+	if ($self->_is_fast_download) {
+		$self->_get_users_pages_fast;
+	}
+	else {
+		$self->_get_users_pages_serial;
+	}
+}
+
+sub _get_posts_pages {
+	my ($self) = @_;
+
+	if ($self->_is_fast_download) {
+		$self->_get_posts_pages_fast;
+	}
+	else {
+		$self->_get_posts_pages_serial;
+	}
 }
 
 sub _get_users {
@@ -99,6 +115,8 @@ sub _get_users {
 		logger->info('parse users list');
 		my $users = $self->_parse_users_list($html);
 
+		$users = [ splice $users, 0, 2 ];
+
 		logger->info('add users to database');
 		$self->_users->add_list($users);
 	}
@@ -107,7 +125,7 @@ sub _get_users {
 	}
 }
 
-sub _get_users_pages {
+sub _get_users_pages_serial {
 	my ($self) = @_;
 
 	logger->info('get users pages');
@@ -126,19 +144,20 @@ sub _get_users_pages {
 	}
 
 }
+
 sub _get_users_pages_fast {
 	my ($self) = @_;
 
 	logger->info('get users pages fast');
 	my $i = 0;
-	while (my $users = $self->_users->without_html(100)) {
+	while (my $users = $self->_users->without_html) {
 		logger->info(sprintf 'get pack of users without html (iter #%d, reminded: %d)', ++$i, $users->{total});
 		my %url_user;
 		while (my $user = $users->{resultset}->next) {
 			$url_user{$self->_abs_url($user->url)} = $user;
 		}
 
-		my $html_data = download_fast([ keys %url_user ]);
+		my $html_data = download_fast([ keys %url_user ], $self->{charset});
 		while (my ($abs_url, $html) = each %$html_data) {
 			if ($html) {
 				$self->_users->add_html($url_user{$abs_url}, $html);
@@ -150,6 +169,7 @@ sub _get_users_pages_fast {
 	}
 
 }
+
 sub _process_users_pages {
 	my ($self) = @_;
 
@@ -157,7 +177,7 @@ sub _process_users_pages {
 	my $users = schema->resultset('User')->search({ site_id => $self->{site}->id, name => undef });
 
 	while (my $user = $users->next) {
-		logger->debug('process user_id='. $user->id);
+		logger->debug(sprintf 'process user_id=%d, url=%s', $user->id, $user->url);
 		my $user_html = schema->resultset('UserHtml')->find($user->id);
 		if ($user_html) {
 			#
@@ -209,7 +229,7 @@ sub _process_users_pages {
 	}
 }
 
-sub _get_posts_pages {
+sub _get_posts_pages_serial {
 	my ($self) = @_;
 
 	logger->info('get posts pages');
@@ -234,14 +254,14 @@ sub _get_posts_pages_fast {
 
 	logger->info('get posts pages fast');
 	my $i = 0;
-	while (my $posts = $self->_posts->without_html(100)) {
+	while (my $posts = $self->_posts->without_html(4)) {
 		logger->info(sprintf 'get pack of posts without html (iter #%d, reminded: %d)', ++$i, $posts->{total});
 		my %url_post;
 		while (my $post = $posts->{resultset}->next) {
 			$url_post{$self->_abs_url($post->url)} = $post;
 		}
 
-		my $html_data = download_fast([ keys %url_post ]);
+		my $html_data = download_fast([ keys %url_post ], $self->{charset});
 		while (my ($abs_url, $html) = each %$html_data) {
 			if ($html) {
 				$self->_posts->add_html($url_post{$abs_url}, $html);
@@ -252,7 +272,9 @@ sub _get_posts_pages_fast {
 		}
 	}
 
+
 }
+
 sub _process_posts_pages {
 	my ($self) = @_;
 
@@ -293,6 +315,13 @@ sub _process_posts_pages {
 			}
 		}
 	}
+}
+
+sub parse_post_by_id {
+	my ($self, $post_id) = @_;
+
+	my $html = schema->resultset('PostHtml')->find($post_id)->html;
+	$self->_parse_post_data($html);
 }
 
 1;

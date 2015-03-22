@@ -5,7 +5,7 @@ use warnings;
 use utf8;
 
 use WebSiteParser::DB;
-
+use Utils;
 
 sub new {
 	my ($class, %p) = @_;
@@ -116,7 +116,7 @@ sub add_html {
 
 	schema->resultset('PostHtml')->create({
 		post_id => $post->id,
-		html    => $html
+		html    => Utils::trim_html($html)
 	});
 }
 

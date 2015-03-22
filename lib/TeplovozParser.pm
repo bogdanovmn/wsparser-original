@@ -25,8 +25,8 @@ sub _parse_user_info {
 	my ($name)      = $html =~ m#<span\s+class=pageheader12r>(.*?)</span>#;
 	my ($reg_date)  = $html =~ m#<i>Регистрация:\s+(\d+-\d+-\d+)</i><BR>#;
 	my ($edit_date) = $html =~ m#<i>Последнее изменение:\s+(\d+-\d+-\d+)</i><BR>#;
-	my ($city)      = $html =~ m#<BR><B>Город</B><BR>(.*?)<br>#;
-	my ($about)     = $html =~ m#<b>О себе</b><BR>(.*)<br><br>#;
+	my ($city)      = $html =~ m#<B>Город</B><BR>(.*?)<br>#;
+	my ($about)     = $html =~ m#<b>О себе</b><BR>(.*?)<br><br>\s*<i>Регистрация#;
 	my ($email)     = $html =~ m#<B>e-mail</B><BR><a href=mailto:(.*?)>#;
 	
 	return { 
@@ -41,24 +41,27 @@ sub _parse_user_info {
 
 sub _parse_user_posts_list {
 	my ($self, $html) = @_;	
-
-	my ($creos_html) = $html =~ m#<BR><span class=pageheader10r>Креативы</span>(.*?)<br><span class=pageheader10r>Избранное</span>#m;
+	
+	my ($creos_html) = $html =~ m#<BR><span\s+class=pageheader10r>Креативы</span>(.*?)<br><span\s+class=pageheader10r>Избранное</span>#;
 	my @list;
 	if ($creos_html) {
-		@list = $creos_html =~ m#<a.*?href=(.*?)>#g;
+		@list = 
+			#map { 
+			#	my ($id_suffix) = $_ =~ m#/(\d+\.html)$#;
+			#	'/printc/'.$id_suffix;
+			#}
+			$creos_html =~ m#<a.*?href=(.*?)>#g;
 	}
-
-	debug \@list; exit;
 
 	return \@list;
 }
 
 sub _parse_post_data {
 	my ($self, $html) = @_;
-
-	my ($date, $name) = $html =~ m#(\d+-\d+-\d+) : <a class=author_auth href=/community/\w+\s+title="Профайл\s+\w+">\w+</a>\s+:\s+<B>(.*?)</B>#;
-	my ($body)        = $html =~ m#<BR><BR><table><tr><td class=justified>(.*?)</td></tr>\s*<tr><td><br><br><center><br><br><span class=pageheader>КОММЕНТАРИ</span>#;
-
+	
+	my ($date, $name) = $html =~ m#<td width=100% class=justified>(\d\d\d\d-\d\d-\d\d) : <a class=author_auth href=/community/\w+ title=".*?">.*?</a> : <B>(.*?)</B>#;
+	my ($body)        = $html =~ m#<table width=100% cellspacing=10><tr><td class=justified>(.*?)</td></tr></table>#;
+	
 	return {
 		name      => $name,
 		body      => $body,

@@ -6,9 +6,10 @@ use bytes;
 
 use LWP::UserAgent;
 use HTTP::Request;
+use Encode;
 
 use AnyEvent::HTTP;
-$AnyEvent::HTTP::MAX_PER_HOST = 10;
+#$AnyEvent::HTTP::MAX_PER_HOST = 10;
 
 use WebSiteParser::Logger;
 use Time::HiRes;
@@ -45,7 +46,6 @@ sub _ua {
 	return $__UA;
 }
 
-
 sub download {
 	my ($url) = @_;
 
@@ -68,7 +68,7 @@ sub download {
 }
 
 sub download_fast {
-	my ($urls) = @_;
+	my ($urls, $decode_from) = @_;
 
 	logger->debug(sprintf 'downloading %d urls', scalar @$urls);
 	
@@ -83,10 +83,16 @@ sub download_fast {
 			#tls_ctx => { verify => 1, verify_peername => 'https' },
 			_common_params(), 
 			sub {
-				my ($body, $headers) = @_;
+				my ($content, $headers) = @_;
+				
+				if ($headers->{Status} eq 500) {
+					debug $headers;
+					print decode($decode_from, $content);
+					exit;
+				}
 
 				$responses{$url} = {
-					body   => $body,
+					body   => decode($decode_from, $content),
 					size   => $headers->{'content-length'},
 					status => $headers->{Status}. ' '. $headers->{Reason}
 				};

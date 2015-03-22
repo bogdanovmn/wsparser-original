@@ -1,4 +1,6 @@
- alter table post add column parse_failed tinyint unsigned not null default 0 after post_date;
+alter table post_html modify column html mediumtext not null;
+
+ -- alter table post add column parse_failed tinyint unsigned not null default 0 after post_date;
 
  -- alter table post drop index url;
  -- alter table post add unique key u_post__user_url(user_id, url);

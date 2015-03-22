@@ -114,4 +114,13 @@ sub set_selected_flag {
 	];
 }
 
+sub trim_html {
+	my ($html) = @_;
+
+	$html =~ s/\n|\r/ /g;
+	$html =~ s/\s+/ /g;
+
+	return $html;
+}
+
 1;

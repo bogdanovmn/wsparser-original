@@ -8,9 +8,18 @@ use lib $FindBin::Bin. '/../lib';
 use NcuxywkaParser;
 use TeplovozParser;
 use Utils;
+use Getopt::Long;
 
 
-my $site = 'teplovoz.com';
+my $site;
+my $type;
+my $post_id;
+GetOptions(
+	'site=s'       => \$site,
+	'type=s'       => \$type,
+	'parse_post=i' => \$post_id,
+);
+
 
 if ($site eq 'ncuxywka.com') {
 	my $parser = NcuxywkaParser->new(
@@ -24,7 +33,10 @@ elsif ($site eq 'teplovoz.com') {
 	my $parser = TeplovozParser->new(
 		host           => 'teplovoz.com',
 		users_list_url => '/community/',
-		fast_download  => 1 
+		fast_download  => 1,
+		charset        => 'cp1251'
 	);
-	$parser->users_full_parse;
+	#$parser->full_parse;
+	#$parser->users_full_parse;
+	$parser->parse_post_by_id(5685);
 }
