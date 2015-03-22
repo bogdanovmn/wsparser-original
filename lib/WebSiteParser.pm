@@ -115,7 +115,7 @@ sub _get_users {
 		logger->info('parse users list');
 		my $users = $self->_parse_users_list($html);
 
-		$users = [ splice $users, 0, 2 ];
+		#$users = [ splice $users, 0, 2 ];
 
 		logger->info('add users to database');
 		$self->_users->add_list($users);
@@ -128,7 +128,7 @@ sub _get_users {
 sub _get_users_pages_serial {
 	my ($self) = @_;
 
-	logger->info('get users pages');
+	logger->info('get users pages (serial)');
 	my $i = 0;
 	while (my $users = $self->_users->without_html) {
 		logger->info(sprintf 'get pack of users without html (iter #%d, reminded: %d)', ++$i, $users->{total});
@@ -148,7 +148,7 @@ sub _get_users_pages_serial {
 sub _get_users_pages_fast {
 	my ($self) = @_;
 
-	logger->info('get users pages fast');
+	logger->info('get users pages (fast)');
 	my $i = 0;
 	while (my $users = $self->_users->without_html) {
 		logger->info(sprintf 'get pack of users without html (iter #%d, reminded: %d)', ++$i, $users->{total});
@@ -232,7 +232,7 @@ sub _process_users_pages {
 sub _get_posts_pages_serial {
 	my ($self) = @_;
 
-	logger->info('get posts pages');
+	logger->info('get posts pages (serial)');
 	my $i = 0;
 	while (my $posts = $self->_posts->without_html) {
 		logger->info(sprintf 'get pack of posts without html (iter #%d, reminded: %d)', ++$i, $posts->{total});
@@ -252,9 +252,9 @@ sub _get_posts_pages_serial {
 sub _get_posts_pages_fast {
 	my ($self) = @_;
 
-	logger->info('get posts pages fast');
+	logger->info('get posts pages (fast)');
 	my $i = 0;
-	while (my $posts = $self->_posts->without_html(4)) {
+	while (my $posts = $self->_posts->without_html(100)) {
 		logger->info(sprintf 'get pack of posts without html (iter #%d, reminded: %d)', ++$i, $posts->{total});
 		my %url_post;
 		while (my $post = $posts->{resultset}->next) {
