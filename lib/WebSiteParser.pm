@@ -47,7 +47,7 @@ sub full_parse {
 	my $begin = time;
 	logger->info('full parse start');
 
-	$self->_get_users;
+	$self->_get_users_list;
 	$self->_get_users_pages;
 	$self->_process_users_pages;
 	
@@ -63,11 +63,9 @@ sub users_full_parse {
 	my $begin = time;
 	logger->info('users full parse start');
 
-	#$self->_get_users;
-	#$self->_get_users_pages;
-	#$self->_process_users_pages;
-	
-	$self->_get_posts_pages;
+	$self->_get_users_list;
+	$self->_get_users_pages;
+	$self->_process_users_pages;
 	
 	logger->info(sprintf 'users full parse finished (%s total)', short_time(time - $begin));
 }
@@ -105,23 +103,28 @@ sub _get_posts_pages {
 	}
 }
 
-sub _get_users {
+sub _fetch_users_list {
 	my ($self) = @_;
 
-	logger->info('get users list');
-	
 	my $html = download($self->_abs_url($self->{users_list_url}));
+	my $users;
 	if ($html) {
 		logger->info('parse users list');
-		my $users = $self->_parse_users_list($html);
-
-		#$users = [ splice $users, 0, 2 ];
-
-		logger->info('add users to database');
-		$self->_users->add_list($users);
+		$users = $self->_parse_users_list(Utils::trim_html($html));
 	}
 	else {
 		logger->error('get users page error');
+	}
+	return $users;
+}
+
+sub _get_users_list {
+	my ($self) = @_;
+
+	my $users = $self->_fetch_users_list;	
+	if ($users) {
+		logger->info('add users to database');
+		$self->_users->add_list($users);
 	}
 }
 
@@ -322,6 +325,74 @@ sub parse_post_by_id {
 
 	my $html = schema->resultset('PostHtml')->find($post_id)->html;
 	debug $self->_parse_post_data($html);
+}
+
+sub test {
+	my ($self) = @_;
+
+	my $begin = time;
+	logger->info('full parse test run');
+
+	my $users = $self->_fetch_users_list;
+	if ($users and @$users) {
+		logger->info(sprintf 'found %d users', scalar @$users);
+		logger->info('try to parse a one user');
+
+		my $user = $users->[int rand scalar @$users];
+		my $user_page_html = download($self->_abs_url($user->{url}));
+		if ($user_page_html) {
+			logger->info('get user html success!');
+			logger->info('parse user info');
+			my $info = $self->_parse_user_info(Utils::trim_html($user_page_html));
+			if (ref $info eq 'HASH' and $info->{name}) {
+				logger->debug(
+					sprintf 'parse info success: %s', 
+						join(', ', sort grep { $info->{$_} } keys %$info)
+				);
+			}
+			else {
+				logger->warn('parse info failed');
+			}
+			
+			logger->info('parse users posts list');
+			my $list = $self->_parse_user_posts_list(Utils::trim_html($user_page_html));
+			if (is_list $list) {
+				logger->info(sprintf 'found %d posts links', scalar @$list);
+				if (@$list) {
+					my $post_url = $list->[0];
+					my $post_page_html = download($self->_abs_url($post_url));
+					if ($post_page_html) {
+						logger->info('get post page success! try to parse it');
+						my $data = $self->_parse_post_data(Utils::trim_html($post_page_html));
+						if (ref $data eq 'HASH' and $data->{name} and $data->{body}) {
+							logger->info(
+								sprintf 'parse success: %s', 
+									join(', ', sort grep { $data->{$_} } keys %$data)
+							);
+						}
+						else {
+							logger->warn(
+								sprintf 'parse failed (%s): url=%s', 
+									join(', ', sort grep { not $data->{$_} } keys %$data),
+									$post_url
+							);
+						}
+					}
+				}
+				else {
+					logger->info('no posts found, try again...');
+				}
+			}
+			else {
+				logger->warn('parse user posts list failed');
+			}
+		}
+	}
+	else {
+		logger->error('failed');
+	}
+
+	logger->info(sprintf 'full parse test run finished (%s total)', short_time(time - $begin));
 }
 
 1;

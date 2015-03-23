@@ -45,12 +45,7 @@ sub _parse_user_posts_list {
 	my ($creos_html) = $html =~ m#<BR><span\s+class=pageheader10r>Креативы</span>(.*?)<br><span\s+class=pageheader10r>Избранное</span>#;
 	my @list;
 	if ($creos_html) {
-		@list = 
-			#map { 
-			#	my ($id_suffix) = $_ =~ m#/(\d+\.html)$#;
-			#	'/printc/'.$id_suffix;
-			#}
-			$creos_html =~ m#<a.*?href=(.*?)>#g;
+		@list = $creos_html =~ m#<a.*?href=(.*?)>#g;
 	}
 
 	return \@list;
