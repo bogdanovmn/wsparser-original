@@ -17,11 +17,11 @@ use WSParserApp::Action::List::Post;
 use WSParserApp::Action::User::View;
 use WSParserApp::Action::Post::View;
 
-get '/'       => sub { controller(template => 'index', action => 'Index') };
-get '/users/' => sub { controller(template => 'users', action => 'List::User') };
-get '/posts/' => sub { controller(template => 'posts', action => 'List::Post') };
-get '/user/'  => sub { controller(template => 'user' , action => 'User::View') };
-get '/post/'  => sub { controller(template => 'post' , action => 'Post::View') };
+get '/'                => sub { controller(template => 'index', action => 'Index') };
+get '/users/:site_id/' => sub { controller(template => 'users', action => 'List::User') };
+get '/posts/:user_id/' => sub { controller(template => 'posts', action => 'List::Post') };
+get '/user/:id/'       => sub { controller(template => 'user' , action => 'User::View') };
+get '/post/:id/'       => sub { controller(template => 'post' , action => 'Post::View') };
 
 any qr{.*}    => sub { controller(template => 'not_found') };
 
