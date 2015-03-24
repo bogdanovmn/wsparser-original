@@ -11,6 +11,7 @@ use Utils;
 sub main {
 	my ($self) = @_;
 
+	my $site  = schema->resultset('Site')->find($self->params->{site_id});
 	my $users = schema->resultset('User')->search(
 		{ 
 			site_id => $self->params->{site_id},
@@ -23,8 +24,13 @@ sub main {
 	);
 
 	return {
-		user_list_by_letter_groups => $self->_by_letter($users),
-		users_by_reg_date          => $self->_by_date($users),
+		site_name                  => $site->host,
+		$users
+			? (
+				user_list_by_letter_groups => $self->_by_letter($users),
+				users_by_reg_date          => $self->_by_date($users),
+			)
+			: ()
 	};
 }
 
@@ -36,7 +42,8 @@ sub _by_date {
 	my @result;
 	my $prev_date = '';
 	while (my $user = $users->next) {
-		my ($date) = split / /, $user->reg_date;
+		my ($date) = split / /, $user->reg_date || '';
+		$date ||= '???';
 
 		my $group     = 0;
 		my $show_date = 1;
@@ -62,8 +69,8 @@ sub _by_date {
 sub _by_letter {
 	my ($self, $users) = @_;
 
-	my %result  = (rus => [], eng => []);
-	my %letters = (rus => [], eng => []);
+	my %result  = (rus => [], eng => [], other => []);
+	my %letters = (rus => [], eng => [], other => []);
 	my %users_count;
 	my $letter_groups = {};
 	

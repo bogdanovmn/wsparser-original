@@ -1,5 +1,5 @@
 <a href='/'>sites</a>
-<h1>Users</h1>
+<h1>Users [ <TMPL_VAR site_name> ]</h1>
 
 <table class=user_edit_menu>
 <tr>
