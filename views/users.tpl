@@ -1,3 +1,4 @@
+<a href='/'>sites</a>
 <h1>Users</h1>
 
 <table class=user_edit_menu>
@@ -11,19 +12,18 @@
 <div class=user_list id="date">
 	<table class=user_list_by_reg_date>
 		<TMPL_LOOP users_by_reg_date>
-			<tr <TMPL_IF u_group>class=group</TMPL_IF>>
-				<td class=date><TMPL_IF u_show_date><TMPL_VAR u_reg_date></TMPL_IF>
+			<tr <TMPL_IF group>class=group</TMPL_IF>>
+				<td class=date>
+					<TMPL_IF show_date><TMPL_VAR reg_date></TMPL_IF>
 				<td class=name>
-					<TMPL_IF u_plagiarist><s></TMPL_IF>
-					<a href='/users/<TMPL_VAR u_id>.html'><TMPL_VAR u_name></a>
-					<TMPL_IF u_plagiarist></s></TMPL_IF>
+					<a href='/user/<TMPL_VAR id>/'><TMPL_VAR name></a>
 		</TMPL_LOOP>
 	</table>
 </div>
 
 <!-- by letter -->
 
-<div class=user_list id="letter">
+<div class=user_list_open id="letter">
 	<TMPL_LOOP user_list_by_letter_groups>
 		<h2><TMPL_VAR title></h2>
 		<table class=user_list_by_letter>

@@ -1,0 +1,24 @@
+a,body,table,tr,td,li,p,input,textarea,pre{font-family:verdana,arial;font-size:8pt;color:#101610;padding:0;margin:0}
+table{width:auto;table-layout:fixed;border-collapse:collapse;text-align:left}
+
+div.main { width: 1024px; margin: 0 auto; }
+
+
+div.user_list { display: none; }
+table.user_list_by_letter    {width:99%}
+table.user_list_by_letter td {vertical-align:top}
+table.user_list_by_letter a  {text-decoration:none;color:#478749}
+table.user_list_by_letter a:hover {color:#478749;text-decoration:underline}
+
+table.user_list_by_reg_date {width:50%;}
+table.user_list_by_reg_date tr.group{background:#d2ecd2}
+table.user_list_by_reg_date td.date{width:15%;padding:3px 5px;color:#808080}
+table.user_list_by_reg_date td.name{padding:3px 5px}
+table.user_list_by_reg_date a{text-decoration:none;color:#478749}
+table.user_list_by_reg_date a:hover{color:#478749;text-decoration:underline}
+
+table.user_edit_menu{width:90%;margin:7px auto}table.user_edit_menu td{font-size:12px;text-align:center;border-bottom:1px solid #d2ecd2;padding:10px}
+table.user_edit_menu td:hover{cursor:pointer;background-color:#d2ecd2}
+table.user_edit_menu td.selected{cursor:pointer;color:#fff;background-color:#5b7d5c}
+div.edit_elements_open{padding:20px;display:block}
+div.edit_elements{padding:20px;display:none}
