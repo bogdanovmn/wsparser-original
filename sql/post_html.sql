@@ -1,8 +1,8 @@
 CREATE TABLE post_html (
 
-	post_id  smallint unsigned NOT NULL,
-	html     blob              NOT NULL,
-	updated  timestamp         NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	post_id  int unsigned NOT NULL,
+	html     mediumtext   NOT NULL,
+	updated  timestamp    NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	
 	PRIMARY KEY (post_id),
 	

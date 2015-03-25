@@ -20,7 +20,7 @@ use WSParserApp::Action::Post::View;
 get '/'                => sub { controller(template => 'index', action => 'Index') };
 get '/users/:site_id/' => sub { controller(template => 'users', action => 'List::User') };
 get '/posts/:user_id/' => sub { controller(template => 'posts', action => 'List::Post') };
-get '/user/:id/'       => sub { controller(template => 'user' , action => 'User::View') };
+get '/user/:user_id/'  => sub { controller(template => 'user' , action => 'User::View') };
 get '/post/:id/'       => sub { controller(template => 'post' , action => 'Post::View') };
 
 any qr{.*}    => sub { controller(template => 'not_found') };

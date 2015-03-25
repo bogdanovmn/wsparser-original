@@ -1,4 +1,22 @@
-alter table post_html modify column html mediumtext not null;
+ alter table post modify column post_date date default null;
+ alter table post modify column body mediumtext default null;
+ alter table user modify column reg_date date default null;
+ alter table user modify column edit_date date default null;
+
+ alter table post_html drop foreign key post_html_ibfk_1;
+ alter table post_html modify column post_id int unsigned not null;
+ alter table post      modify column id int unsigned not null;
+ alter table post_html add foreign key (post_id) references post (id) on delete cascade on update cascade; 
+
+ alter table user_html drop foreign key user_html_ibfk_1;
+ alter table post      drop foreign key post_ibfk_1;
+ alter table user      modify column id int unsigned not null;
+ alter table user_html modify column user_id int unsigned not null;
+ alter table post      modify column user_id int unsigned not null;
+ alter table user_html add foreign key (user_id) references user (id) on delete cascade on update cascade; 
+ alter table post      add foreign key (user_id) references user (id) on delete cascade on update cascade;
+ 
+ -- alter table post_html modify column html mediumtext not null;
 
  -- alter table post add column parse_failed tinyint unsigned not null default 0 after post_date;
 

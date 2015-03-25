@@ -1,6 +1,6 @@
 CREATE TABLE user (
 
-	id          smallint unsigned NOT NULL AUTO_INCREMENT,
+	id          int unsigned NOT NULL AUTO_INCREMENT,
 	site_id     smallint unsigned NOT NULL,
 	url         varchar(250)      NOT NULL UNIQUE,
 	reg_date    datetime          DEFAULT NULL,

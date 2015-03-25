@@ -9,7 +9,12 @@ use WebSiteParser::Config;
 
 use Exporter;
 our @ISA    = qw( Exporter );
-our @EXPORT = qw( schema );
+our @EXPORT = qw( 
+	schema 
+	AS_HASH
+);
+
+use constant AS_HASH => (result_class => 'DBIx::Class::ResultClass::HashRefInflator');
 
 my $__SCHEMA;
 

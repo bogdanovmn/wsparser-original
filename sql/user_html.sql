@@ -1,8 +1,8 @@
 CREATE TABLE user_html (
 
-	user_id     smallint unsigned NOT NULL,
-	html        blob              NOT NULL,
-	updated   timestamp         NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	user_id     int unsigned NOT NULL,
+	html        mediumtext   NOT NULL,
+	updated     timestamp    NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	
 	PRIMARY KEY (user_id),
 	
