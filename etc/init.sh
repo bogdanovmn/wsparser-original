@@ -28,8 +28,9 @@ ARGS="\
 	--error-log /var/log/starman/$PROJECT_NAME.error.log \
 	--access-log /var/log/starman/$PROJECT_NAME.access.log \
 	--port $PORT \
-	--max-requests $MAX_REQUESTS
-	-D "
+	--max-requests $MAX_REQUESTS \
+	-R $APP_PATH/lib
+	"
 
 if [ -z "$APP" ]; then
     echo "Can't proceed, \$APP not defined"

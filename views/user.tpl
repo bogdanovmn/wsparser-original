@@ -1,4 +1,4 @@
-<h1>User [ <a href="/site/<TMPL_VAR site_id>/"><TMPL_VAR site_name></a> ]</h1>
+<h1>User [ <a href="/users/<TMPL_VAR site_id>/"><TMPL_VAR site_name></a> ]</h1>
 
 <div class=user_info>
 	<p>
