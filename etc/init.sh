@@ -29,7 +29,7 @@ ARGS="\
 	--access-log /var/log/starman/$PROJECT_NAME.access.log \
 	--port $PORT \
 	--max-requests $MAX_REQUESTS \
-	-R $APP_PATH/lib
+	-R $APP_PATH/lib -D
 	"
 
 if [ -z "$APP" ]; then

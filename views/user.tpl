@@ -18,7 +18,7 @@
 		<TMPL_IF about>
 			<b>О себе:</b>
 			<br>
-			<TMPL_VAR NAME=about>
+			<TMPL_VAR about>
 			<br>
 			<br>
 		</TMPL_IF>
@@ -38,8 +38,8 @@
 
 
 <TMPL_IF posts>
-	<div class=user_posts>
-	<table>
+	<a href="/post/all/<TMPL_VAR id>/">Показать все крео на одной странице</a>
+	<table class=user_posts>
 		<tr>
 			<th class=date>Дата
 			<th class=title>Название
@@ -55,6 +55,5 @@
 				</TMPL_IF>
 	</TMPL_LOOP>
 	</table>
-	</div>
 </TMPL_IF>
 
